@@ -1,3 +1,5 @@
 
 sol_scores
 .idea/workspace.xml
+*.iws
+.gradle

@@ -16,15 +16,21 @@ import java.io.File;
 public class Main extends Application {
 
     static String solScoresPath;
+    static ArrayList<Solution> solutions = new ArrayList<>();
 
-
-    class Sample {
+    static class Sample {
         int index;
         double score;
+
+        Sample(int index, double score) {
+            this.index = index;
+            this.score = score;
+        }
     }
 
-    class Solution {
+    static class Solution {
         ArrayList<Sample> samples;
+        String title;
     }
 
 
@@ -54,15 +60,19 @@ public class Main extends Application {
                 if (file.isDirectory()) continue;
                 // may be that file is not found
                 try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                    Solution solution = new Solution();
+                    solution.title = file.getName();
                     String line;
                     while ((line = br.readLine()) != null) {
-                        if (line.charAt(0) == '#') continue;
+                        if (line.isEmpty() || line.charAt(0) == '#') continue;
                         String[] res = line.split(":");
                         if (res.length != 2) {
+                            throw new RuntimeException();
                             // something went wrong
                         }
                         int sampleIndex = Integer.parseInt(res[0]);
                         double sampleScore = Double.parseDouble(res[1]);
+                        solution.samples.add(new Sample(sampleIndex, sampleScore));
                         // process the line.
                     }
                 } catch (Exception ex) {
