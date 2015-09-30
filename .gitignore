@@ -3,3 +3,6 @@ sol_scores
 .idea/workspace.xml
 *.iws
 .gradle
+build
+.DS_Store
+out
