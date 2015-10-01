@@ -37,87 +37,17 @@ public class Main extends Application {
     static String solScoresPath;
     static ArrayList<Solution> solutions = new ArrayList<>();
 
-    private TableView table = new TableView();
-
+    private TableView table = null;
+    private Controller controller = new Controller();
 
     // better put logic inside controller. no problem
-    boolean choosen_0 = false;
-    boolean choosen_1 = false;
-
-
-
-    static class Item {
-        int index;
-
-        Item(int index) {
-            this.index = index;
-        }
-    }
-
 
     @Override
     public void start(Stage stage) throws Exception{
         Scene scene = new Scene(new Group());
         stage.setTitle("Table View Sample");
-        table.setEditable(false);
-        ArrayList<Item> items = new ArrayList<>();
-        Solution sol = solutions.get(0);
-        for (int i = 0; i < sol.samples.size(); ++i) items.add(new Item(i));
-
-        // table is dynamic no need in fxml file for now
-        table.getItems().setAll(items);
-        TableView.TableViewSelectionModel model = table.getSelectionModel();
-        table.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-
-                TableColumn column = null;
-
-
-                if ((!choosen_0 || !choosen_1) && event.getClickCount() == 1) {
-                    event.consume();
-
-                    TableColumnHeader header = (TableColumnHeader)event.getTarget();
-                    System.out.println("hello");
-                }
-            }
-        });
-        TableColumn<Item, Integer> sampleIndexCol = new TableColumn<>("Sample #");
-        Node node = sampleIndexCol.getGraphic();
-        sampleIndexCol.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().index));
-        ArrayList<TableColumn<Item, Double>> solutionCols = new ArrayList<>();
-        for (Solution s : solutions) {
-            TableColumn<Item, Double> col = new TableColumn<>(s.title);
-            col.setCellValueFactory(param -> {
-                Item item = param.getValue();
-                return new ReadOnlyObjectWrapper<>(s.samples.get(item.index).score);
-            });
-            col.setCellFactory(new Callback<TableColumn<Item, Double>, TableCell<Item, Double>>() {
-                @Override
-                public TableCell<Item, Double> call(TableColumn<Item, Double> param) {
-                    return new TableCell<Item, Double>() {
-                        @Override
-                        protected void updateItem(Double item, boolean empty) {
-                            // so here we actually able to change style as we want
-                            int row = getIndex();
-                            int col = getTableView().getColumns().indexOf(getTableColumn());
-
-                            // probably cache column index inside column itself
-                            // should have chosen stuff somewhere nearby to know which bg to apply
-                            // probably should put this shit to controller
-                            // especially logic
-
-                            super.updateItem(item, empty);
-                        }
-                    };
-                }
-            });
-            solutionCols.add(col);
-        }
-        ObservableList<TableColumn> list = (ObservableList<TableColumn>)table.getColumns();
-        list.addAll(sampleIndexCol);
-        list.addAll(solutionCols);
-
+        controller.setData(solutions);
+        table = controller.buildTable();
         ((Group) scene.getRoot()).getChildren().addAll(table);
 
         stage.setScene(scene);
