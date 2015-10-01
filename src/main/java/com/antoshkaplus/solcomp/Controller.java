@@ -47,7 +47,6 @@ public class Controller {
         for (int i = 0; i < sol.samples.size(); ++i) items.add(new Item(i));
         table.getItems().setAll(items);
 
-        table.setOnMouseClicked(new MouseClickHandler());
         TableColumn<Item, Integer> sampleIndexCol = new TableColumn<>("Sample #");
         sampleIndexCol.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().sampleIndex));
         ArrayList<TableColumn<Item, Double>> solutionCols = new ArrayList<>();
@@ -70,42 +69,20 @@ public class Controller {
         return table;
     }
 
-
-    // getScoreCellFactory
-
-
-    private class MouseClickHandler implements EventHandler<MouseEvent> {
-        @Override
-        public void handle(MouseEvent event) {
-            // if column already chosen don't do anything (maybe user checks rows)
-            // if another column chosen: move shit from 0 to 1... and assign to 0
-            EventTarget target = event.getTarget();
-
-            if (!(target instanceof ScoreCell)) return;
-            ScoreCell cell = (ScoreCell)target;
-            int col = cell.column;
-            if ((!isChosen[0] || chosenIndex[0] != col) && (!isChosen[1] || chosenIndex[1] != col)) {
-                isChosen[1] = isChosen[0];
-                chosenIndex[1] = chosenIndex[0];
-                isChosen[0] = true;
-                chosenIndex[0] = col;
-                // have to ask for update
-            }
-        }
-    }
-
-    private class ScoreCell extends TableCell<Item, Double> {
+    private class ScoreCell extends TableCell<Item, Double> implements EventHandler<MouseEvent>  {
         int column;
 
         ScoreCell(int column) {
             super();
             this.column = column;
+            setOnMouseClicked(this);
         }
 
         @Override
         protected void updateItem(Double item, boolean empty) {
             int row = getIndex();
-            if (row == -1) return;
+            // -1 and last are strange rows
+            if (item == null) return;
             int col = column;
             // choosing color
             // if chosen only one of them color items yellow ???
@@ -134,11 +111,31 @@ public class Controller {
                         setStyle(lowerScoreBg);
                     }
                 }
+            } else {
+                setStyle("");
             }
-            setText(Double.toString(item));
+            try {
+                setText(Double.toString(item));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
 
-
+        @Override
+        public void handle(MouseEvent event) {
+            // if column already chosen don't do anything (maybe user checks rows)
+            // if another column chosen: move shit from 0 to 1... and assign to 0
+            int col = column;
+            if ((!isChosen[0] || chosenIndex[0] != col) && (!isChosen[1] || chosenIndex[1] != col)) {
+                isChosen[1] = isChosen[0];
+                chosenIndex[1] = chosenIndex[0];
+                isChosen[0] = true;
+                chosenIndex[0] = col;
+                // have to ask for update
+                getTableView().getColumns().get(0).setVisible(false);
+                getTableView().getColumns().get(0).setVisible(true);
+            }
+        }
     }
 
     class Item {
