@@ -5,6 +5,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.event.EventTarget;
+import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -18,16 +19,20 @@ import java.util.DoubleSummaryStatistics;
 // later may think about builder pattern
 public class Controller {
 
+    @FXML
+    TableView table;
+
     ArrayList<Solution> solutions;
     boolean[] isChosen = new boolean[2];
     int[] chosenIndex = new int[2];
 
-    String higherScoreBg = "-fx-background-color: green";
-    String lowerScoreBg = "-fx-background-color: red";
-    String unknownScoreBg = "-fx-background-color: yellow";
+    String higherScoreBg = "-fx-background-color: lightgreen";
+    String lowerScoreBg = "-fx-background-color: lightpink";
+    String unknownScoreBg = "-fx-background-color: khaki";
 
-    void setData(ArrayList<Solution> solutions) {
+    void setSolutions(ArrayList<Solution> solutions) {
         this.solutions = solutions;
+        onSolutionsUpdated();
     }
 
     public Callback<TableColumn<Item, Double>, TableCell<Item, Double>> getScoreCellFactory(int column) {
@@ -39,9 +44,10 @@ public class Controller {
         };
     }
 
-    TableView buildTable() {
-        TableView table = new TableView();
-        table.setEditable(false);
+    public void onSolutionsUpdated() {
+        table.getColumns().clear();
+        table.getItems().clear();
+
         ArrayList<Item> items = new ArrayList<>();
         Solution sol = solutions.get(0);
         for (int i = 0; i < sol.samples.size(); ++i) items.add(new Item(i));
@@ -66,7 +72,6 @@ public class Controller {
         ObservableList<TableColumn> list = (ObservableList<TableColumn>)table.getColumns();
         list.addAll(sampleIndexCol);
         list.addAll(solutionCols);
-        return table;
     }
 
     private class ScoreCell extends TableCell<Item, Double> implements EventHandler<MouseEvent>  {
@@ -114,6 +119,7 @@ public class Controller {
             } else {
                 setStyle("");
             }
+
             try {
                 setText(Double.toString(item));
             } catch (Exception ex) {
@@ -126,7 +132,15 @@ public class Controller {
             // if column already chosen don't do anything (maybe user checks rows)
             // if another column chosen: move shit from 0 to 1... and assign to 0
             int col = column;
-            if ((!isChosen[0] || chosenIndex[0] != col) && (!isChosen[1] || chosenIndex[1] != col)) {
+            if (isChosen[0] && chosenIndex[0] == col) {
+                isChosen[0] = false;
+                getTableView().getColumns().get(0).setVisible(false);
+                getTableView().getColumns().get(0).setVisible(true);
+            } else if (isChosen[1] && chosenIndex[1] == col) {
+                isChosen[1] = false;
+                getTableView().getColumns().get(0).setVisible(false);
+                getTableView().getColumns().get(0).setVisible(true);
+            } else if ((!isChosen[0] || chosenIndex[0] != col) && (!isChosen[1] || chosenIndex[1] != col)) {
                 isChosen[1] = isChosen[0];
                 chosenIndex[1] = chosenIndex[0];
                 isChosen[0] = true;

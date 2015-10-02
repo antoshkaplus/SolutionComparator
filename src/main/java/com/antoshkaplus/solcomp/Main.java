@@ -12,6 +12,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -46,22 +47,19 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws Exception{
-        controller.setData(solutions);
-        table = controller.buildTable();
+        URL location = ClassLoader.getSystemResource("table.fxml");
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        fxmlLoader.setLocation(location);
+        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
 
+        Parent root = (Parent) fxmlLoader.load(location.openStream());
+        VBox pane = (VBox)root;//fxmlLoader.load(getClass().getResource("table.fxml").openStream());
+        Controller controller = (Controller) fxmlLoader.getController();
+        controller.setSolutions(solutions);
 
-        VBox h = new VBox();
+        Scene scene = new Scene(pane);
 
-        h.setFillWidth(true);
-        table.setMaxHeight(Double.MAX_VALUE);
-        table.setMaxWidth(Double.MAX_VALUE);
-
-        h.getChildren().add(table);
-        h.setStyle("-fx-background-color: #336699");
-
-        Scene scene = new Scene(h);
-
-        stage.setTitle("Table View Sample");
+        stage.setTitle("Solution Comparator");
         stage.setScene(scene);
         stage.show();
     }
