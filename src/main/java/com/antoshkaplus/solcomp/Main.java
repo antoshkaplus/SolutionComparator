@@ -74,6 +74,7 @@ public class Main extends Application {
         } else {
             solScoresPath = args[0];
         }
+        System.out.println("path: " + solScoresPath);
 
         File dir = new File(solScoresPath);
         File[] directoryListing = dir.listFiles();
